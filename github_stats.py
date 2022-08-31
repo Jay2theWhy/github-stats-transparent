@@ -280,6 +280,8 @@ Languages:
         self._repos = set()
         self._ignored_repos = set()
         
+        exclude_langs_lower = {x.lower() for x in self._exclude_langs}
+        
         next_owned = None
         next_contrib = None
         while True:
@@ -319,6 +321,8 @@ Languages:
                     self._ignored_repos.add(name)
 
             for repo in repos:
+                if repo is None:
+                    continue
                 name = repo.get("nameWithOwner")
                 if name in self._repos or name in self._exclude_repos:
                     continue
@@ -329,7 +333,8 @@ Languages:
                 for lang in repo.get("languages", {}).get("edges", []):
                     name = lang.get("node", {}).get("name", "Other")
                     languages = await self.languages
-                    if name in self._exclude_langs: continue
+                    if name.lower() in exclude_langs_lower:
+                        continue
                     if name in languages:
                         languages[name]["size"] += lang.get("size", 0)
                         languages[name]["occurrences"] += 1
